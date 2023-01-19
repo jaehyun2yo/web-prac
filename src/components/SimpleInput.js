@@ -1,42 +1,39 @@
-import { useState } from "react";
+import { useInput } from "./hooks/use-input";
 
 const SimpleInput = (props) => {
-  // 입력값
-  const [enteredName, setEnteredName] = useState("");
-  // 유효한지확인하는값
-  // const [enteredNameIsVaild, setEnteredNameIsVaild] = useState(false);
-  // 사용자 가 입력란에 터치한지 확인하는 값
-  const [enteredNameTouched, setEnteredNameTouched] = useState(false);
+  // 커스텀훅
+  const {
+    value: enteredName,
+    isValid: enteredNameIsVaild,
+    hasError: nameInputHasError,
+    valueChangeHandler: nameInputChangeHandler,
+    inputBlurHandler: nameInputBlurHandler,
+    reset: nameReset,
+  } = useInput((value) => value.trim() !== "");
 
-  const enteredNameIsVaild = enteredName.trim() !== "";
-  const nameInputIsInvalid = !enteredNameIsVaild && enteredNameTouched;
+  let formIsValid = false;
 
-  const nameInputChangeHandler = (e) => {
-    setEnteredName(e.target.value);
-  };
-
-  const nameInputBlurHandler = (e) => {
-    setEnteredNameTouched(true);
-  };
+  if (enteredNameIsVaild) {
+    formIsValid = true;
+  }
 
   const formSubmitssionHandler = (e) => {
+    console.log("누르긴함");
     e.preventDefault();
 
-    setEnteredNameTouched(true);
     if (!enteredNameIsVaild) {
+      console.log("작동안함");
       return;
     }
     console.log(enteredName);
 
-    setEnteredName("");
-    setEnteredNameTouched(false);
+    nameReset();
   };
 
-  const nameInputClasses = nameInputIsInvalid
+  const nameInputClasses = nameInputHasError
     ? "form-control invalid"
     : "form-control";
-
-  console.log(enteredName);
+  console.log(formIsValid);
   return (
     <form onSubmit={formSubmitssionHandler}>
       <div className={nameInputClasses}>
@@ -48,12 +45,10 @@ const SimpleInput = (props) => {
           onBlur={nameInputBlurHandler}
           value={enteredName}
         />
-        {nameInputIsInvalid && (
-          <p className="error-text">이름을 입력해주세요</p>
-        )}
+        {nameInputHasError && <p className="error-text">이름을 입력해주세요</p>}
       </div>
       <div className="form-actions">
-        <button>Submit</button>
+        <button disabled={!formIsValid}>Submit</button>
       </div>
     </form>
   );
